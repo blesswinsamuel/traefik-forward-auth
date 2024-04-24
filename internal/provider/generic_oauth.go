@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
 
@@ -90,7 +91,19 @@ func (o *GenericOAuth) GetUser(token string) (User, error) {
 	}
 
 	defer res.Body.Close()
-	err = json.NewDecoder(res.Body).Decode(&user)
+	var m map[string]interface{}
+	err = json.NewDecoder(res.Body).Decode(&m)
+	if err != nil {
+		return user, err
+	}
+	log.WithFields(log.Fields{
+		"token": token,
+		"resp":  m,
+	}).Debug("GetUser response")
+
+	user = User{
+		Email: m["email"].(string),
+	}
 
 	return user, err
 }

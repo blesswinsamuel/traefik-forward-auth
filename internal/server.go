@@ -32,9 +32,13 @@ func (s *Server) buildRoutes() {
 	for name, rule := range config.Rules {
 		matchRule := rule.formattedRule()
 		if rule.Action == "allow" {
-			s.muxer.AddRoute(matchRule, 1, s.AllowHandler(name))
+			if err := s.muxer.AddRoute(matchRule, 1, s.AllowHandler(name)); err != nil {
+				log.Fatal(err)
+			}
 		} else {
-			s.muxer.AddRoute(matchRule, 1, s.AuthHandler(rule.Provider, name))
+			if err := s.muxer.AddRoute(matchRule, 1, s.AuthHandler(rule.Provider, name)); err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 
